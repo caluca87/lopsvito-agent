@@ -6,8 +6,8 @@ import xml.etree.ElementTree as ET
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-# 🔵 ID del canale Lopsvito (questo va nel codice)
-RSS_URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UCf8fVtX8Hk2YtYtq8uQfV0xA"
+# 🔵 FEED STABILE (non bloccato da YouTube)
+RSS_URL = "https://feed.yt/UCf8fVtX8Hk2YtYtq8uQfV0xA"
 
 def manda_telegram(testo):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -16,6 +16,11 @@ def manda_telegram(testo):
 
 def prendi_ultimo_video():
     r = requests.get(RSS_URL)
+
+    # Se la risposta NON è XML → YouTube ha restituito HTML
+    if not r.text.strip().startswith("<?xml"):
+        raise Exception("Feed YouTube non disponibile (YouTube ha restituito HTML).")
+
     root = ET.fromstring(r.text)
 
     entry = root.find("{http://www.w3.org/2005/Atom}entry")
