@@ -2,12 +2,18 @@ import os
 import requests
 import xml.etree.ElementTree as ET
 
-# 🔐 PRENDIAMO I DATI DAI SEGRETI DEL SERVER
+# 🔐 Segreti dal server
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-# 🔵 FEED STABILE (non bloccato da YouTube)
-RSS_URL = "https://feed.yt/UCf8fVtX8Hk2YtYtq8uQfV0xA"
+# 🔵 Feed ufficiale YouTube
+RSS_URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UCf8fVtX8Hk2YtYtq8uQfV0xA"
+
+# 🔵 User-Agent finto browser (YouTube altrimenti restituisce HTML)
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}
 
 def manda_telegram(testo):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -15,11 +21,11 @@ def manda_telegram(testo):
     requests.get(url, params=params)
 
 def prendi_ultimo_video():
-    r = requests.get(RSS_URL)
+    r = requests.get(RSS_URL, headers=HEADERS)
 
-    # Se la risposta NON è XML → YouTube ha restituito HTML
+    # Se non è XML → YouTube ha restituito HTML
     if not r.text.strip().startswith("<?xml"):
-        raise Exception("Feed YouTube non disponibile (YouTube ha restituito HTML).")
+        raise Exception("YouTube ha restituito HTML invece di XML. Ritenta tra qualche minuto.")
 
     root = ET.fromstring(r.text)
 
