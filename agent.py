@@ -1,13 +1,12 @@
 import os
 import requests
 import xml.etree.ElementTree as ET
-import time
 
 # 🔐 PRENDIAMO I DATI DAI SEGRETI DEL SERVER
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-# 🔵 ID del canale Lopsvito (già inserito)
+# 🔵 ID del canale Lopsvito (questo va nel codice)
 RSS_URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UCf8fVtX8Hk2YtYtq8uQfV0xA"
 
 def manda_telegram(testo):
@@ -27,24 +26,16 @@ def prendi_ultimo_video():
     return {"id": video_id, "titolo": titolo, "url": link}
 
 def main():
-    ultimo_id = None
+    video = prendi_ultimo_video()
 
-    while True:
-        video = prendi_ultimo_video()
+    messaggio = (
+        f"📢 Nuovo video di Lopsvito!\n\n"
+        f"🎬 Titolo: {video['titolo']}\n"
+        f"🔗 Link: {video['url']}\n\n"
+        f"📝 (La parte di trascrizione e riassunto verrà aggiunta dopo)"
+    )
 
-        if video["id"] != ultimo_id:
-            ultimo_id = video["id"]
-
-            messaggio = (
-                f"📢 Nuovo video di Lopsvito!\n\n"
-                f"🎬 Titolo: {video['titolo']}\n"
-                f"🔗 Link: {video['url']}\n\n"
-                f"📝 (La parte di trascrizione e riassunto verrà aggiunta dopo)"
-            )
-
-            manda_telegram(messaggio)
-
-        time.sleep(24 * 60 * 60)
+    manda_telegram(messaggio)
 
 if __name__ == "__main__":
     main()
