@@ -1,10 +1,11 @@
+import os
 import requests
 import xml.etree.ElementTree as ET
 import time
 
-# 🔐 INSERISCI QUI I TUOI DATI
-TELEGRAM_TOKEN = "8602600167:AAG59w8TdCoDKoLIr_M1Rj67fBVz10lCrSM"
-CHAT_ID = "24993178"
+# 🔐 PRENDIAMO I DATI DAI SEGRETI DEL SERVER
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 # 🔵 ID del canale Lopsvito (già inserito)
 RSS_URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UCf8fVtX8Hk2YtYtq8uQfV0xA"
