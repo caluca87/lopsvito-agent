@@ -6,14 +6,8 @@ import xml.etree.ElementTree as ET
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-# 🔵 Feed ufficiale YouTube
-RSS_URL = "https://www.youtube.com/feeds/videos.xml?channel_id=UCf8fVtX8Hk2YtYtq8uQfV0xA"
-
-# 🔵 User-Agent finto browser (YouTube altrimenti restituisce HTML)
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                  "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
+# 🔵 Feed stabile tramite RSSHub
+RSS_URL = "https://rsshub.app/youtube/channel/UCf8fVtX8Hk2YtYtq8uQfV0xA"
 
 def manda_telegram(testo):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -21,18 +15,20 @@ def manda_telegram(testo):
     requests.get(url, params=params)
 
 def prendi_ultimo_video():
-    r = requests.get(RSS_URL, headers=HEADERS)
+    r = requests.get(RSS_URL)
 
-    # Se non è XML → YouTube ha restituito HTML
+    # Controllo XML
     if not r.text.strip().startswith("<?xml"):
-        raise Exception("YouTube ha restituito HTML invece di XML. Ritenta tra qualche minuto.")
+        raise Exception("Il feed non è XML. Il server RSS potrebbe essere temporaneamente non disponibile.")
 
     root = ET.fromstring(r.text)
 
-    entry = root.find("{http://www.w3.org/2005/Atom}entry")
-    titolo = entry.find("{http://www.w3.org/2005/Atom}title").text
-    link = entry.find("{http://www.w3.org/2005/Atom}link").attrib["href"]
-    video_id = entry.find("{http://www.youtube.com/xml/schemas/2015}videoId").text
+    entry = root.find("channel/item")
+    titolo = entry.find("title").text
+    link = entry.find("link").text
+
+    # Estrarre ID dal link
+    video_id = link.split("v=")[-1]
 
     return {"id": video_id, "titolo": titolo, "url": link}
 
